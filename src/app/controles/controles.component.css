@@ -1,0 +1,26 @@
+.patas-selector{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f0f0f0;
+  gap: 20px;
+  padding: 20px;
+}
+
+button{
+  font-size: 18px;
+  padding: 15px 30px;
+  border: none;
+  border-radius: 8px;
+  background-color: #1976d2;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  width: 200px
+}
+
+button:hover{
+  background-color: #1565c0;
+}
