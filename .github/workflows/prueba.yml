@@ -1,0 +1,62 @@
+name: API Version generator
+run-name: ${{ github.actor }} generated a new version
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  automatic_tag:
+    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'master'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate version
+        id: version
+        run: |
+          YEAR=$(date +'%Y')
+          WEEK=$(date +'%V')
+          PREFIX="${YEAR}${WEEK}"
+
+          EXISTING_TAGS=$(git tag -l "${PREFIX}-*")
+          if [ -z "$EXISTING_TAGS" ]; then
+            INDEX=1
+          else
+            INDEX=$(echo "$EXISTING_TAGS" | sed "s/^${PREFIX}-//" | sort -n | tail -1)
+            INDEX=$((INDEX + 1))
+          fi
+
+          VERSION="${PREFIX}-${INDEX}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Generate release notes
+        id: notes
+        run: |
+          VERSION=${{ steps.version.outputs.version }}
+          DATE=$(date +'%d-%m-%Y')
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          PR_BODY="${{ github.event.pull_request.body }}"
+
+          echo "## [$VERSION] - $DATE" > release_notes.md
+          echo "" >> release_notes.md
+          if [ ! -z "$PR_BODY" ]; then
+            echo "$PR_BODY" >> release_notes.md
+            echo "" >> release_notes.md
+          fi
+          echo "---" >> release_notes.md
+          echo "" >> release_notes.md
+          echo "Generated automatically from PR: $PR_TITLE" >> release_notes.md
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.version }}
+          name: "Release ${{ steps.version.outputs.version }}"
+          body_path: release_notes.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
