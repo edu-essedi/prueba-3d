@@ -37,11 +37,6 @@ jobs:
           VERSION="${PREFIX}-${INDEX}"
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-      - name: Create Git tag
-        run: |
-          git tag ${{ steps.version.outputs.version }}
-          git push origin ${{ steps.version.outputs.version }}
-
       - name: Generate release notes
         id: notes
         run: |
@@ -58,7 +53,6 @@ jobs:
           fi
           echo "---" >> release_notes.md
           echo "" >> release_notes.md
-          echo "Generated automatically from PR: $PR_TITLE" >> release_notes.md
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
