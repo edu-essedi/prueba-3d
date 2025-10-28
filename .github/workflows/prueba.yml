@@ -37,6 +37,11 @@ jobs:
           VERSION="${PREFIX}-${INDEX}"
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
+      - name: Create Git tag
+        run: |
+          git tag ${{ steps.version.outputs.version }}
+          git push origin ${{ steps.version.outputs.version }}
+
       - name: Generate release notes
         id: notes
         run: |
